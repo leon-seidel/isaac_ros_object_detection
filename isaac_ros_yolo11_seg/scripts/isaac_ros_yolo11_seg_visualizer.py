@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES
-# Copyright (c) 2023-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
 # the result as an image message
 
 import cv2
+import numpy as np
 import cv_bridge
 import message_filters
 import rclpy
@@ -113,35 +114,69 @@ names = {
 }
 
 
-class Yolov8Visualizer(Node):
+class Yolo11SegVisualizer(Node):
     QUEUE_SIZE = 10
     color = (0, 255, 0)
     bbox_thickness = 2
 
     def __init__(self):
-        super().__init__('yolov8_visualizer')
+        super().__init__('yolo11_seg_visualizer')
         self._bridge = cv_bridge.CvBridge()
         self._processed_image_pub = self.create_publisher(
-            Image, 'yolov8_processed_image',  self.QUEUE_SIZE)
+            Image, 'yolo11_seg_processed_image',  self.QUEUE_SIZE)
 
         self._detections_subscription = message_filters.Subscriber(
             self,
             Detection2DArray,
             'detections_output')
+        self._detections_mask_subscription = message_filters.Subscriber(
+            self,
+            Image,
+            'detections_mask')
         self._image_subscription = message_filters.Subscriber(
             self,
             Image,
-            '/yolov8_encoder/resize/image')
+            'image')
 
         self.time_synchronizer = message_filters.TimeSynchronizer(
-            [self._detections_subscription, self._image_subscription],
+            [self._detections_subscription, self._image_subscription, self._detections_mask_subscription],
             self.QUEUE_SIZE)
 
         self.time_synchronizer.registerCallback(self.detections_callback)
 
-    def detections_callback(self, detections_msg, img_msg):
+    def detections_callback(self, detections_msg, img_msg, mask_msg):
+        def model_to_image_pos(model_point, image_shape, model_shape):
+            model_px, model_py = model_point
+            image_x, image_y = image_shape
+            model_x, model_y = model_shape
+                        
+            rel_image_y = image_y / image_x
+            rel_model_y = model_y / model_x
+            rel_model_point_y = model_py / model_y
+            rel_model_point_x = model_px / model_x
+
+            image_py = round(image_y * ((rel_model_point_y - ((rel_model_y - rel_image_y) / 2)) / rel_image_y))
+            image_px = round(image_x * rel_model_point_x)
+ 
+            return (image_px, image_py)
+
+        
         txt_color = (255, 0, 255)
-        cv2_img = self._bridge.imgmsg_to_cv2(img_msg)
+        cv2_img = self._bridge.imgmsg_to_cv2(img_msg, desired_encoding="rgb8")
+        cv2_mask = self._bridge.imgmsg_to_cv2(mask_msg)
+        image_shape = [cv2_img.shape[1], cv2_img.shape[0]]
+        model_shape = [cv2_mask.shape[1], cv2_mask.shape[0]]
+
+        upscaled_mask = cv2.resize(cv2_mask, (cv2_img.shape[1], cv2_img.shape[1]), interpolation=cv2.INTER_LINEAR)
+        height_start = round((cv2_img.shape[1] - cv2_img.shape[0]) / 2)
+        height_end = cv2_img.shape[1] - height_start
+        upscaled_mask = upscaled_mask[height_start:height_end, 0:cv2_img.shape[1]]
+        red_color = (255, 0, 0)
+        opacity = 0.6
+        red_mask = np.zeros_like(cv2_img)
+        red_mask[upscaled_mask > 0] = red_color
+        cv2_img = cv2.addWeighted(cv2_img, 1.0, red_mask, opacity, 0.0)
+
         for detection in detections_msg.detections:
             center_x = detection.bbox.center.position.x
             center_y = detection.bbox.center.position.y
@@ -156,7 +191,10 @@ class Yolov8Visualizer(Node):
                       round(center_y - (height / 2.0)))
             max_pt = (round(center_x + (width / 2.0)),
                       round(center_y + (height / 2.0)))
-
+            
+            min_pt = model_to_image_pos(min_pt, image_shape, (cv2_img.shape[1], cv2_img.shape[1]))
+            max_pt = model_to_image_pos(max_pt, image_shape, (cv2_img.shape[1], cv2_img.shape[1]))
+            
             lw = max(round((img_msg.height + img_msg.width) / 2 * 0.003), 2)  # line width
             tf = max(lw - 1, 1)  # font thickness
             # text width, height
@@ -167,6 +205,11 @@ class Yolov8Visualizer(Node):
                           self.color, self.bbox_thickness)
             cv2.putText(cv2_img, label, (min_pt[0], min_pt[1]-2 if outside else min_pt[1]+h+2),
                         0, lw / 3, txt_color, thickness=tf, lineType=cv2.LINE_AA)
+            
+            lowest_point_x = round(detection.results[0].pose.pose.position.x * cv2_mask.shape[1])
+            lowest_point_y = round(detection.results[0].pose.pose.position.y * cv2_mask.shape[0])
+            lowest_point = model_to_image_pos((lowest_point_x, lowest_point_y), image_shape, model_shape)
+            cv2.circle(cv2_img, lowest_point, radius=10, color=(255, 0, 0), thickness=-1)
 
         processed_img = self._bridge.cv2_to_imgmsg(
             cv2_img, encoding=img_msg.encoding)
@@ -175,7 +218,7 @@ class Yolov8Visualizer(Node):
 
 def main():
     rclpy.init()
-    rclpy.spin(Yolov8Visualizer())
+    rclpy.spin(Yolo11SegVisualizer())
     rclpy.shutdown()
 
 

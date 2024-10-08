@@ -16,7 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 cmake_minimum_required(VERSION 3.22.1)
-project(isaac_ros_yolov8 LANGUAGES C CXX)
+project(isaac_ros_yolo11_seg LANGUAGES C CXX)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -34,16 +34,16 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 ament_auto_find_build_dependencies()
 find_package(ament_cmake_python REQUIRED)
 
-# yolov8 Decoder node
-ament_auto_add_library(yolov8_decoder_node SHARED src/yolov8_decoder_node.cpp)
-rclcpp_components_register_nodes(yolov8_decoder_node "nvidia::isaac_ros::yolov8::YoloV8DecoderNode")
-set(node_plugins "${node_plugins}nvidia::isaac_ros::yolov8::YoloV8DecoderNode;$<TARGET_FILE:yolov8_decoder_node>\n")
-set_target_properties(yolov8_decoder_node PROPERTIES
+# yolo11_seg Decoder node
+ament_auto_add_library(yolo11_seg_decoder_node SHARED src/yolo11_seg_decoder_node.cpp)
+rclcpp_components_register_nodes(yolo11_seg_decoder_node "nvidia::isaac_ros::yolo11_seg::Yolo11SegDecoderNode")
+set(node_plugins "${node_plugins}nvidia::isaac_ros::yolo11_seg::Yolo11SegDecoderNode;$<TARGET_FILE:yolo11_seg_decoder_node>\n")
+set_target_properties(yolo11_seg_decoder_node PROPERTIES
   BUILD_WITH_INSTALL_RPATH TRUE
   BUILD_RPATH_USE_ORIGIN TRUE
   INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-target_link_libraries(yolov8_decoder_node ${OpenCV_LIBRARIES})
+target_link_libraries(yolo11_seg_decoder_node ${OpenCV_LIBRARIES})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -62,7 +62,7 @@ endif()
 ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS
-  scripts/isaac_ros_yolov8_visualizer.py
+  scripts/isaac_ros_yolo11_seg_visualizer.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

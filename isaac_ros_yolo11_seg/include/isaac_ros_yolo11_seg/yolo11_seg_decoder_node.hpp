@@ -15,8 +15,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ISAAC_ROS_YOLOV8__YOLOV8_DECODER_NODE_HPP_
-#define ISAAC_ROS_YOLOV8__YOLOV8_DECODER_NODE_HPP_
+#ifndef ISAAC_ROS_YOLO11Seg__YOLO11Seg_DECODER_NODE_HPP_
+#define ISAAC_ROS_YOLO11Seg__YOLO11Seg_DECODER_NODE_HPP_
 
 #include <memory>
 #include <string>
@@ -27,21 +27,22 @@
 
 #include "std_msgs/msg/string.hpp"
 #include "vision_msgs/msg/detection2_d_array.hpp"
+#include "sensor_msgs/msg/image.hpp"
 #include "isaac_ros_nitros_tensor_list_type/nitros_tensor_list_view.hpp"
 
 namespace nvidia
 {
 namespace isaac_ros
 {
-namespace yolov8
+namespace yolo11_seg
 {
 
-class YoloV8DecoderNode : public rclcpp::Node
+class Yolo11SegDecoderNode : public rclcpp::Node
 {
 public:
-  explicit YoloV8DecoderNode(const rclcpp::NodeOptions options = rclcpp::NodeOptions());
+  explicit Yolo11SegDecoderNode(const rclcpp::NodeOptions options = rclcpp::NodeOptions());
 
-  ~YoloV8DecoderNode();
+  ~Yolo11SegDecoderNode();
 
 private:
   void InputCallback(const nvidia::isaac_ros::nitros::NitrosTensorListView & msg);
@@ -53,16 +54,23 @@ private:
   // Publisher for output Detection2DArray messages
   rclcpp::Publisher<vision_msgs::msg::Detection2DArray>::SharedPtr pub_;
 
-  // Name of tensor in NitrosTensorList
-  std::string tensor_name_{};
+  // Publisher for output mask messages
+  rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr pub_mask_;
 
-  // YOLOv8 Decoder Parameters
+  // Name of tensors in NitrosTensorList
+  std::string tensor_name_{};
+  std::string tensor1_name_{};
+
+  // YOLO11_seg Decoder Parameters
   double confidence_threshold_{};
   double nms_threshold_{};
+  long int input_image_width_{};
+  long int input_image_height_{};
+  long int num_classes_{};
 };
 
-}  // namespace yolov8
+}  // namespace yolo11_seg
 }  // namespace isaac_ros
 }  // namespace nvidia
 
-#endif  // ISAAC_ROS_YOLOV8__YOLOV8_DECODER_NODE_HPP_
+#endif  // ISAAC_ROS_YOLO11Seg__YOLO11Seg_DECODER_NODE_HPP_

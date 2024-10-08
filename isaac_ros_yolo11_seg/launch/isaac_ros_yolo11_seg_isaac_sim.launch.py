@@ -27,7 +27,7 @@ from launch_ros.descriptions import ComposableNode
 
 
 def generate_launch_description():
-    """Launch the DNN Image encoder, TensorRT node and YOLOv8 decoder node."""
+    """Launch the DNN Image encoder, TensorRT node and YOLO11_seg decoder node."""
     launch_args = [
         DeclareLaunchArgument(
             'input_image_width',
@@ -113,9 +113,10 @@ def generate_launch_description():
     verbose = LaunchConfiguration('verbose')
     force_engine_update = LaunchConfiguration('force_engine_update')
 
-    # YOLOv8 Decoder parameters
+    # YOLO11_seg Decoder parameters
     confidence_threshold = LaunchConfiguration('confidence_threshold')
     nms_threshold = LaunchConfiguration('nms_threshold')
+    num_classes = LaunchConfiguration('num_classes')
 
     image_resize_node_left = ComposableNode(
         package='isaac_ros_image_proc',
@@ -134,7 +135,7 @@ def generate_launch_description():
     )
 
     encoder_dir = get_package_share_directory('isaac_ros_dnn_image_encoder')
-    yolov8_encoder_launch = IncludeLaunchDescription(
+    yolo11_seg_encoder_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [os.path.join(encoder_dir, 'launch', 'dnn_image_encoder.launch.py')]
         ),
@@ -147,8 +148,8 @@ def generate_launch_description():
             'image_stddev': image_stddev,
             'enable_padding': 'False',
             'attach_to_shared_component_container': 'True',
-            'component_container_name': 'yolov8_container',
-            'dnn_image_encoder_namespace': 'yolov8_encoder',
+            'component_container_name': 'yolo11_seg_container',
+            'dnn_image_encoder_namespace': 'yolo11_seg_encoder',
             'image_input_topic': '/front_stereo_camera/left_rgb/image_resize',
             'camera_info_input_topic': '/front_stereo_camera/left_rgb/camerainfo_resize',
             'tensor_output_topic': '/tensor_pub',
@@ -171,30 +172,33 @@ def generate_launch_description():
         }]
     )
 
-    yolov8_decoder_node = ComposableNode(
-        name='yolov8_decoder_node',
-        package='isaac_ros_yolov8',
-        plugin='nvidia::isaac_ros::yolov8::YoloV8DecoderNode',
+    yolo11_seg_decoder_node = ComposableNode(
+        name='yolo11_seg_decoder_node',
+        package='isaac_ros_yolo11_seg',
+        plugin='nvidia::isaac_ros::yolo11_seg::Yolo11SegDecoderNode',
         parameters=[{
             'confidence_threshold': confidence_threshold,
             'nms_threshold': nms_threshold,
+            'input_image_height': input_image_height,
+            'input_image_width': input_image_width,
+            'num_classes': num_classes,
         }]
     )
 
-    yolov8_container = ComposableNodeContainer(
+    yolo11_seg_container = ComposableNodeContainer(
         package='rclcpp_components',
-        name='yolov8_container',
+        name='yolo11_seg_container',
         namespace='',
         executable='component_container_mt',
-        composable_node_descriptions=[image_resize_node_left, tensor_rt_node, yolov8_decoder_node],
+        composable_node_descriptions=[image_resize_node_left, tensor_rt_node, yolo11_seg_decoder_node],
         output='screen'
     )
 
-    yolov8_visualizer_node = Node(
-        package='isaac_ros_yolov8',
-        executable='isaac_ros_yolov8_visualizer.py',
-        name='yolov8_visualizer',
-        remappings=[('yolov8_encoder/resize/image', 'front_stereo_camera/left_rgb/image_resize')]
+    yolo11_seg_visualizer_node = Node(
+        package='isaac_ros_yolo11_seg',
+        executable='isaac_ros_yolo11_seg_visualizer.py',
+        name='yolo11_seg_visualizer',
+        remappings=[('yolo11_seg_encoder/resize/image', 'front_stereo_camera/left_rgb/image_resize')]
 
     )
 
@@ -202,12 +206,12 @@ def generate_launch_description():
         package='rqt_image_view',
         executable='rqt_image_view',
         name='image_view',
-        arguments=['/yolov8_processed_image'],
+        arguments=['/yolo11_seg_processed_image'],
         parameters=[
                 {'my_str': 'rgb8'},
         ]
     )
 
     return launch.LaunchDescription(launch_args +
-                                    [yolov8_container, yolov8_encoder_launch,
-                                     yolov8_visualizer_node, rqt_image_view_node])
+                                    [yolo11_seg_container, yolo11_seg_encoder_launch,
+                                     yolo11_seg_visualizer_node, rqt_image_view_node])

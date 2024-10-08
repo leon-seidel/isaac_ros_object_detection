@@ -82,12 +82,13 @@ def generate_launch_description():
     verbose = LaunchConfiguration('verbose')
     force_engine_update = LaunchConfiguration('force_engine_update')
 
-    # YOLOv8 Decoder parameters
+    # YOLO11_seg Decoder parameters
     confidence_threshold = LaunchConfiguration('confidence_threshold')
     nms_threshold = LaunchConfiguration('nms_threshold')
+    num_classes = LaunchConfiguration('num_classes')
 
     encoder_dir = get_package_share_directory('isaac_ros_dnn_image_encoder')
-    yolov8_encoder_launch = IncludeLaunchDescription(
+    yolo11_seg_encoder_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [os.path.join(encoder_dir, 'launch', 'dnn_image_encoder.launch.py')]
         ),
@@ -100,7 +101,7 @@ def generate_launch_description():
             'image_stddev': image_stddev,
             'attach_to_shared_component_container': 'True',
             'component_container_name': 'tensor_rt_container',
-            'dnn_image_encoder_namespace': 'yolov8_encoder',
+            'dnn_image_encoder_namespace': 'yolo11_seg_encoder',
             'image_input_topic': '/image',
             'camera_info_input_topic': '/camera_info',
             'tensor_output_topic': '/tensor_pub',
@@ -123,13 +124,16 @@ def generate_launch_description():
         }]
     )
 
-    yolov8_decoder_node = ComposableNode(
-        name='yolov8_decoder_node',
-        package='isaac_ros_yolov8',
-        plugin='nvidia::isaac_ros::yolov8::YoloV8DecoderNode',
+    yolo11_seg_decoder_node = ComposableNode(
+        name='yolo11_seg_decoder_node',
+        package='isaac_ros_yolo11_seg',
+        plugin='nvidia::isaac_ros::yolo11_seg::Yolo11SegDecoderNode',
         parameters=[{
             'confidence_threshold': confidence_threshold,
             'nms_threshold': nms_threshold,
+            'input_image_height': input_image_height,
+            'input_image_width': input_image_width,
+            'num_classes': num_classes,
         }]
     )
 
@@ -137,11 +141,11 @@ def generate_launch_description():
         name='tensor_rt_container',
         package='rclcpp_components',
         executable='component_container_mt',
-        composable_node_descriptions=[tensor_rt_node, yolov8_decoder_node],
+        composable_node_descriptions=[tensor_rt_node, yolo11_seg_decoder_node],
         output='screen',
         arguments=['--ros-args', '--log-level', 'INFO'],
         namespace=''
     )
 
-    final_launch_description = launch_args + [tensor_rt_container, yolov8_encoder_launch]
+    final_launch_description = launch_args + [tensor_rt_container, yolo11_seg_encoder_launch]
     return launch.LaunchDescription(final_launch_description)
