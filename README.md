@@ -1,6 +1,6 @@
-# YOLO11 instance segmentation for Isaac ROS Object Detection
+# YOLO11 instance segmentation for Isaac ROS
 
-Adding YOLO11 instance segmentation to Isaac ROS Object Detection.
+Adding YOLO11 (and YOLOv8) instance segmentation to Isaac ROS.
 
 <div align="center"><img alt="segmentation image" src="./isaac_ros_yolo11_seg/example/segmentation_example.png" width="400px"/></div>
 
