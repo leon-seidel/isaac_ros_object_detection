@@ -2,10 +2,10 @@
 
 Adding YOLO11 instance segmentation to Isaac ROS Object Detection.
 
-<div align="center"><img alt="segmentation image" src="./isaac_ros_yolo11_seg/example/segmentation_example.png" width="400px"/>
+<div align="center"><img alt="segmentation image" src="./isaac_ros_yolo11_seg/example/segmentation_example.png" width="400px"/></div>
 
 ## Overview
-While object detection with both YOLO11 and YOLOv8 is possible with the ISAAC ROS YOLOv8 node, instance segmentation is not supported. This repo adds a node and lauch files to run YOLO11 and YOLOv8 instance segmentation models with ISAAC ROS. The segmentation masks are visualized with an additional ROS2 `image_msgs` message. Additionally the lowest point in every mask is computed as well and published within the `Detection2D` message.
+While object detection with both YOLO11 and YOLOv8 is possible with the ISAAC ROS YOLOv8 node, instance segmentation is not supported. This repo adds a node and lauch files to run YOLO11 and YOLOv8 instance segmentation models with ISAAC ROS. The segmentation masks are visualized with an additional ROS2 `Image` message. Additionally the lowest point in every mask is computed as well and published within the `Detection2DArray` message.
 
 ## Installation
 You can follow the [installation guide](https://nvidia-isaac-ros.github.io/repositories_and_packages/isaac_ros_object_detection/isaac_ros_yolov8/index.html#quickstart) for YOLOv8 object detection until `Build isaac_ros_yolov8`.
