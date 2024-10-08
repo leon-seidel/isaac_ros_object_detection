@@ -44,15 +44,15 @@ def generate_launch_description():
             description='A list of tensor names to bound to the specified input binding names'),
         DeclareLaunchArgument(
             'input_binding_names',
-            default_value='[""]',
+            default_value='["images"]',
             description='A list of input tensor binding names (specified by model)'),
         DeclareLaunchArgument(
             'output_tensor_names',
-            default_value='["output_tensor"]',
+            default_value='["output_tensor", "output_tensor1"]',
             description='A list of tensor names to bound to the specified output binding names'),
         DeclareLaunchArgument(
             'output_binding_names',
-            default_value='[""]',
+            default_value='["output0", "output1"]',
             description='A list of output tensor binding names (specified by model)'),
         DeclareLaunchArgument(
             'verbose',
@@ -62,6 +62,34 @@ def generate_launch_description():
             'force_engine_update',
             default_value='False',
             description='Whether TensorRT should update the TensorRT engine file or not'),
+        DeclareLaunchArgument(
+            'image_mean',
+            default_value='[0.0, 0.0, 0.0]',
+            description='The mean for image normalization'),
+        DeclareLaunchArgument(
+            'image_stddev',
+            default_value='[1.0, 1.0, 1.0]',
+            description='The standard deviation for image normalization'),
+        DeclareLaunchArgument(
+            'confidence_threshold',
+            default_value='0.25',
+            description='Confidence threshold to filter candidate detections during NMS'),
+        DeclareLaunchArgument(
+            'nms_threshold',
+            default_value='0.45',
+            description='NMS IOU threshold'),
+        DeclareLaunchArgument(
+            'num_classes',
+            default_value='80',
+            description='Number of classes in the model'),
+        DeclareLaunchArgument(
+            'network_image_width',
+            default_value='640',
+            description='The input image width that the network expects'),
+        DeclareLaunchArgument(
+            'network_image_height',
+            default_value='640',
+            description='The input image height that the network expects'),
     ]
 
     # DNN Image Encoder parameters
@@ -84,7 +112,7 @@ def generate_launch_description():
 
     # YOLO11_seg Decoder parameters
     confidence_threshold = LaunchConfiguration('confidence_threshold')
-    nms_threshold = LaunchConfiguration('nms_threshold')
+    nms_threshold = LaunchConfiguration('nms_threshold', default=0.45)
     num_classes = LaunchConfiguration('num_classes')
 
     encoder_dir = get_package_share_directory('isaac_ros_dnn_image_encoder')
@@ -102,8 +130,8 @@ def generate_launch_description():
             'attach_to_shared_component_container': 'True',
             'component_container_name': 'tensor_rt_container',
             'dnn_image_encoder_namespace': 'yolo11_seg_encoder',
-            'image_input_topic': '/image',
-            'camera_info_input_topic': '/camera_info',
+            'image_input_topic': '/image_rect',
+            'camera_info_input_topic': '/camera_info_rect',
             'tensor_output_topic': '/tensor_pub',
         }.items(),
     )

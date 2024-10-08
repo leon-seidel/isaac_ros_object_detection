@@ -87,6 +87,8 @@ class IsaacROSYolo11SegLaunchFragment(IsaacROSLaunchFragment):
 
         network_image_width = LaunchConfiguration('network_image_width')
         network_image_height = LaunchConfiguration('network_image_height')
+        input_image_width = LaunchConfiguration('input_image_width')
+        input_image_height = LaunchConfiguration('input_image_height')
         image_mean = LaunchConfiguration('image_mean')
         image_stddev = LaunchConfiguration('image_stddev')
 
@@ -102,6 +104,16 @@ class IsaacROSYolo11SegLaunchFragment(IsaacROSLaunchFragment):
                 'network_image_height',
                 default_value='640',
                 description='The input image height that the network expects'
+            ),
+            'input_image_width': DeclareLaunchArgument(
+                'input_image_width',
+                default_value='640',
+                description='The input image width from the camera'
+            ),
+            'input_image_height': DeclareLaunchArgument(
+                'input_image_height',
+                default_value='640',
+                description='The input image height from the camera'
             ),
             'image_mean': DeclareLaunchArgument(
                 'image_mean',
@@ -135,12 +147,12 @@ class IsaacROSYolo11SegLaunchFragment(IsaacROSLaunchFragment):
             ),
             'output_tensor_names': DeclareLaunchArgument(
                 'output_tensor_names',
-                default_value='["output_tensor"]',
+                default_value='["output_tensor", "output_tensor1"]',
                 description='A list of tensor names to bound to the specified output binding names'
             ),
             'output_binding_names': DeclareLaunchArgument(
                 'output_binding_names',
-                default_value='["output0"]',
+                default_value='["output0", "output1"]',
                 description='A list of output tensor binding names (specified by model)'
             ),
             'verbose': DeclareLaunchArgument(
@@ -163,13 +175,18 @@ class IsaacROSYolo11SegLaunchFragment(IsaacROSLaunchFragment):
                 default_value='0.45',
                 description='NMS IOU threshold'
             ),
+            'num_classes': DeclareLaunchArgument(
+                'num_classes',
+                default_value='80',
+                description='Number of classes in the model'
+            ),
             'yolo11_seg_encoder_launch': IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     [os.path.join(encoder_dir, 'launch', 'dnn_image_encoder.launch.py')]
                 ),
                 launch_arguments={
-                    'input_image_width': str(interface_specs['camera_resolution']['width']),
-                    'input_image_height': str(interface_specs['camera_resolution']['height']),
+                    'input_image_width': input_image_width,
+                    'input_image_height': input_image_height,
                     'network_image_width': network_image_width,
                     'network_image_height': network_image_height,
                     'image_mean': image_mean,

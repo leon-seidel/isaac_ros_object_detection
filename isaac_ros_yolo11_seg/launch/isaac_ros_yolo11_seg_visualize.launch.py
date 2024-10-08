@@ -35,7 +35,8 @@ def generate_launch_description():
         Node(
             package='isaac_ros_yolo11_seg',
             executable='isaac_ros_yolo11_seg_visualizer.py',
-            name='yolo11_seg_visualizer'
+            name='yolo11_seg_visualizer',
+            remappings=[('image', 'image_rect')]
         ),
         Node(
             package='rqt_image_view',

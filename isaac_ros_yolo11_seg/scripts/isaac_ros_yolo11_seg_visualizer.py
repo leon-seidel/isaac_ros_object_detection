@@ -162,7 +162,7 @@ class Yolo11SegVisualizer(Node):
 
         
         txt_color = (255, 0, 255)
-        cv2_img = self._bridge.imgmsg_to_cv2(img_msg, desired_encoding="rgb8")
+        cv2_img = self._bridge.imgmsg_to_cv2(img_msg, desired_encoding="bgr8")
         cv2_mask = self._bridge.imgmsg_to_cv2(mask_msg)
         image_shape = [cv2_img.shape[1], cv2_img.shape[0]]
         model_shape = [cv2_mask.shape[1], cv2_mask.shape[0]]
@@ -171,7 +171,7 @@ class Yolo11SegVisualizer(Node):
         height_start = round((cv2_img.shape[1] - cv2_img.shape[0]) / 2)
         height_end = cv2_img.shape[1] - height_start
         upscaled_mask = upscaled_mask[height_start:height_end, 0:cv2_img.shape[1]]
-        red_color = (255, 0, 0)
+        red_color = (0, 0, 255)
         opacity = 0.6
         red_mask = np.zeros_like(cv2_img)
         red_mask[upscaled_mask > 0] = red_color

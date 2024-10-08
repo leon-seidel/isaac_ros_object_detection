@@ -57,7 +57,7 @@ Yolo11SegDecoderNode::Yolo11SegDecoderNode(const rclcpp::NodeOptions options)
   tensor_name_{declare_parameter<std::string>("tensor_name", "output_tensor")},
   tensor1_name_{declare_parameter<std::string>("tensor1_name", "output_tensor1")},
   confidence_threshold_{declare_parameter<double>("confidence_threshold", 0.25)},
-  nms_threshold_{declare_parameter<double>("nms_threshold", 0.45)}.
+  nms_threshold_{declare_parameter<double>("nms_threshold", 0.45)},
   input_image_width_{declare_parameter<long int>("input_image_width", 640)},
   input_image_height_{declare_parameter<long int>("input_image_height", 640)},
   num_classes_{declare_parameter<long int>("num_classes", 80)}
