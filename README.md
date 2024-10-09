@@ -52,13 +52,14 @@ source install/setup.bash
 
 
 ## Usage
-
+### Launching the pipeline
 Launch the YOLO11 instance segmentation pipeline using:
 ```
-ros2 launch isaac_ros_yolo11_seg yolo11_seg_tensor_rt.launch.py model_file_path:=./isaac_ros_assets/models/yolo11/yolo11n-seg.onnx engine_file_path:=./isaac_ros_assets/models/yolo11/yolov11n-seg.plan input_image_width:=640 input_image_height:=640 confidence_threshold:=0.85
+ros2 launch isaac_ros_yolo11_seg yolo11_seg_tensor_rt.launch.py model_file_path:=./isaac_ros_assets/models/yolo11/yolo11n-seg.onnx engine_file_path:=./isaac_ros_assets/models/yolo11/yolo11n-seg.plan input_image_width:=640 input_image_height:=640 confidence_threshold:=0.85
 ```
 This will launch the encoder node, a TensorRT runtime for the model and a the YOLO11 segmentation decoder node. On first start a TensorRT engine is created from the ONNX model, which might take some minutes. The launch file contains several more parameters to adapt the nodes for custom models and configurations.
 
+### Example data
 For an example rosbag start a second terminal with the Docker container:
 ```
 cd ${ISAAC_ROS_WS}/src/isaac_ros_common && \
@@ -68,10 +69,16 @@ And then play the rosbag:
 ```
 ros2 bag play -l ${ISAAC_ROS_WS}/isaac_ros_assets/isaac_ros_yolov8/quickstart.bag
 ```
+
+### Visualisation
 To visualize the model output start a third terminal with the Docker container:
 ```
 cd ${ISAAC_ROS_WS}/src/isaac_ros_common && \
 ./scripts/run_dev.sh
+```
+Source the ROS workspace:
+```
+source install/setup.bash
 ```
 And then launch the visualizer node and the RQT Image View:
 ```
