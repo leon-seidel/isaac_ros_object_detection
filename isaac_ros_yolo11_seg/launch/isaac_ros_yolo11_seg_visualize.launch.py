@@ -25,13 +25,13 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    my_package_dir = get_package_share_directory('isaac_ros_yolo11_seg')
+    # my_package_dir = get_package_share_directory('isaac_ros_yolo11_seg')
     return LaunchDescription([
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([os.path.join(
-                my_package_dir, 'launch'),
-                '/yolo11_seg_tensor_rt.launch.py'])
-        ),
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource([os.path.join(
+        #         my_package_dir, 'launch'),
+        #         '/yolo11_seg_tensor_rt.launch.py'])
+        # ),
         Node(
             package='isaac_ros_yolo11_seg',
             executable='isaac_ros_yolo11_seg_visualizer.py',

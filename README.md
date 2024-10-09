@@ -55,7 +55,7 @@ source install/setup.bash
 
 Launch the YOLO11 instance segmentation pipeline with visualisation using:
 ```
-ros2 launch ./src/isaac_ros_object_detection/isaac_ros_yolo11_seg/launch/isaac_ros_yolo11_seg_visualize.launch.py model_file_path:=./isaac_ros_assets/models/yolo11/yolo11n-seg.onnx engine_file_path:=./isaac_ros_assets/models/yolo11/yolov11n-seg.plan input_binding_names:=['images'] output_binding_names:=['output0','output1'] output_tensor_names:=['output_tensor','output_tensor1']  network_image_width:=640 network_image_height:=640 force_engine_update:=False image_mean:=[0.0,0.0,0.0] image_stddev:=[1.0,1.0,1.0] input_image_width:=640 input_image_height:=640 confidence_threshold:=0.25 nms_threshold:=0.45 num_classes:=80
+ros2 launch ./src/isaac_ros_object_detection/isaac_ros_yolo11_seg/launch/yolo11_seg_tensor_rt.launch.py model_file_path:=./isaac_ros_assets/models/yolo11/yolo11n-seg.onnx engine_file_path:=./isaac_ros_assets/models/yolo11/yolov11n-seg.plan input_image_width:=640 input_image_height:=640
 ```
 For an example rosbag start a second terminal with the Docker container:
 ```
@@ -66,4 +66,12 @@ And then play the rosbag:
 ```
 ros2 bag play -l ${ISAAC_ROS_WS}/isaac_ros_assets/isaac_ros_yolov8/quickstart.bag
 ```
-
+To visualize the model output start a third terminal with the Docker container:
+```
+cd ${ISAAC_ROS_WS}/src/isaac_ros_common && \
+./scripts/run_dev.sh
+```
+And then launch the visualizer node and the RQT Image View:
+```
+ros2 launch src/isaac_ros_object_detection/isaac_ros_yolo11_seg/launch/isaac_ros_yolo11_seg_visualize.launch.py
+```
