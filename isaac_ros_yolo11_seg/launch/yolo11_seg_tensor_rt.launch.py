@@ -90,6 +90,14 @@ def generate_launch_description():
             'network_image_height',
             default_value='640',
             description='The input image height that the network expects'),
+        DeclareLaunchArgument(
+            'input_image_width',
+            default_value='640',
+            description='The input image width from the camera'),
+        DeclareLaunchArgument(
+            'input_image_height',
+            default_value='640',
+            description='The input image height from the camera'),
     ]
 
     # DNN Image Encoder parameters
@@ -112,7 +120,7 @@ def generate_launch_description():
 
     # YOLO11_seg Decoder parameters
     confidence_threshold = LaunchConfiguration('confidence_threshold')
-    nms_threshold = LaunchConfiguration('nms_threshold', default=0.45)
+    nms_threshold = LaunchConfiguration('nms_threshold')
     num_classes = LaunchConfiguration('num_classes')
 
     encoder_dir = get_package_share_directory('isaac_ros_dnn_image_encoder')
